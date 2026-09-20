@@ -1,0 +1,12 @@
+fast
+slow
+hash_test
+build/
+*.o
+*~
+*.exe
+*.user
+*.iobj
+*.ipdb
+*.pdb
+.vs/
