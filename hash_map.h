@@ -213,28 +213,75 @@ private:
     // Insert an element. If successful, the element's position is returned. If
     // there is already another element with the same key in the table, return
     // some value >= capacity.
+    /////////////////////////////////////////////////////
+    ///////////////////INSERT_KEY//////////////////////////
+    ////////////////////////////////////////////////////
+
     size_t insert_key(const Key &key, const Value &value) {
         // Grow the table if needed. Ensures that there are at least 2 free
         // elements, making sure that at least one element is empty after we
         // insert an element.
-        grow_if_needed();
+        grow_if_needed(); //KIKA TILL LITE PÅ DENNA
 
-        // TODO: Finish the implementation. Return either the index where the
-        // element was inserted, or 'capacity' if the value already existed.
-        // Remember to update 'element_count'!
+        //Börjar på den position som key hachas till
+        size_t pos = hash_key(key);
 
-        return capacity; // Always return failure for now.
+        //fortsätt söka så länge platsen är upptagen
+        while (used[pos]) {
+
+            //Om key finns ska vi inte lägga in den igen
+            if (keys[pos] == key) {
+                return capacity;
+            }
+
+            //Kollision -> gå till nästa position.
+            //& capacity gör att vi börjar om från 0 efter sista platsen.
+            pos = (pos + 1) % capacity;
+        }
+
+        //Hittade en ledig plats så läggs key och value in
+        used[pos] = true;
+        keys[pos] = key;
+        values[pos] = value;
+
+        //Vi har lagt till ett nytt element ökar count
+        element_count++;
+
+        //retunerar position där element läggs in
+        return pos;
     }
+    /////////////////////////////////////////////////
+    /////////////////////////////////////////////////
 
     // Find which the position where a key is located in the hash table. If the
     // key is found, return its position in the table. Otherwise, returns some
     // value >= capacity.
-    size_t find_key(const Key &key) const {
-        // TODO: Finish the implementation. Return either the index where the
-        // element was found, or 'capacity' if the value already existed.
+    /////////////////////////////////////////////////////
+    ///////////////////FIND_KEY//////////////////////////
+    ////////////////////////////////////////////////////
 
-        return capacity; // Always return failure for now.
+    size_t find_key(const Key &key) const {
+        // Börja på den position som key hashas till.
+        size_t pos = hash_key(key);
+
+        // Fortsätt söka så länge platsen är upptagen.
+        while (used[pos]) {
+
+            // Om vi hittar rätt key returnerar vi dess position.
+            if (keys[pos] == key) {
+                return pos;
+            }
+
+            // Om kollision uppstår går vi till nästa position.
+            // % capacity gör att vi börjar om från 0 efter sista platsen.
+            pos = (pos + 1) % capacity;
+        }
+
+        // Om platsen är tom innebär det att key inte finns i tabellen.
+        return capacity;
     }
+    /////////////////////////////////////////////////
+    /////////////////////////////////////////////////
 
     // Erase a key from the hash table. Returns 'true' if a key was removed and
     // 'false' otherwise.
@@ -323,7 +370,7 @@ public:
             advance();
         }
 
-        // Advance the iterator to the next used element.
+        // Advance to the next used element.
         void advance() {
             while (pos < m.capacity && !m.used[pos]) {
                 ++pos;
@@ -335,6 +382,7 @@ public:
         bool operator ==(const const_iterator &o) const {
             return &m == &o.m && pos == o.pos;
         }
+
         bool operator !=(const const_iterator &o) const {
             return !(*this == o);
         }
