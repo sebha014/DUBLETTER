@@ -235,7 +235,7 @@ private:
             }
 
             //Kollision -> gå till nästa position.
-            //& capacity gör att vi börjar om från 0 efter sista platsen.
+            //% capacity gör att vi börjar om från 0 efter sista platsen.
             pos = (pos + 1) % capacity;
         }
 
@@ -285,12 +285,56 @@ private:
 
     // Erase a key from the hash table. Returns 'true' if a key was removed and
     // 'false' otherwise.
+    //////////////// REMOVE ///////////////////////
+    ///////////////////////////////////////////////
     bool erase_key(const Key &key) {
-        // TODO: Finish the implementation. Return 'true' if the element was
-        // found and removed. Otherwise, return 'false'. Remember to update
-        // 'element_count'!
-        return false;
+
+    // Börjar på den position som key har hashats till
+    size_t pos = hash_key(key);
+
+    // Fortsätter söka så länge platsen är upptagen
+    while (used[pos]) {
+
+        // Hittade rätt key
+        if (keys[pos] == key) {
+            used[pos] = false;
+            element_count--;
+
+            // Kontrollera efterföljande element
+            size_t next = (pos + 1) % capacity;
+
+            while (used[next]) {
+
+                // Ta reda på var nästa element egentligen vill ligga
+                size_t hashed = hash_key(keys[next]);
+
+                // Om elementet behöver flyttas tillbaka
+                if ((pos <= next && (hashed <= pos || hashed > next)) ||
+                    (pos > next && (hashed <= pos && hashed > next))) {
+
+                    keys[pos] = keys[next];
+                    values[pos] = values[next];
+                    used[pos] = true;
+                    used[next] = false;
+
+                    pos = next;
+                }
+
+                next = (next + 1) % capacity;
+            }
+
+            return true;
+        }
+
+        // Kollision -> gå till nästa position
+        pos = (pos + 1) % capacity;
     }
+
+    // Key hittades inte
+    return false;
+    }
+
+///////////////////////////////////////////////
 
     // Allocate and initialize a new table.
     void alloc_table(size_t size) {
