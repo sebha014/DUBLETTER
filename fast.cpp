@@ -42,22 +42,26 @@ public:
     // Vertical increases in brightness.
     vector<bool> vertical;
 
+    //Jämför två summaries och kontrollerar att både horizontal och vertical är lika
     bool operator==(const Image_Summary &other) const {
         return horizontal == other.horizontal &&
                vertical == other.vertical;
     }
 };
 ///////////////////////////////////////////////
+//Hashfunktionen för image summary så den kan använads som nyckel i hashtabell
 template <>
 class std::hash<Image_Summary> {
 public:
     size_t operator()(const Image_Summary &to_hash) const {
         size_t result = 0;
 
+        //Bygger hasrvärdet från horisontell information
         for (bool value : to_hash.horizontal) {
             result = (result << 1) | value;
         }
 
+        //samma med vertikala infon
         for (bool value : to_hash.vertical) {
             result = (result << 1) | value;
         }
@@ -69,12 +73,14 @@ public:
 ////////////////////////////////////////////////
 // Compute an Image_Summary from an image. This is described in detail in the
 // lab instructions.
+//Skapar en förenklad summary av bilden för att hitta bilder som liknar varandra
 Image_Summary compute_summary(const Image &image) {
     const size_t summary_size = 8;
     Image_Summary result;
 
     Image small = image.shrink(summary_size + 1, summary_size + 1);
 
+    //Kollar ljusstyrkan ökar mellan pixlar horisontellt
     for (size_t y = 0; y < summary_size + 1; y++) {
     for (size_t x = 0; x < summary_size; x++) {
         result.horizontal.push_back(
@@ -84,6 +90,7 @@ Image_Summary compute_summary(const Image &image) {
     }
 }
 
+    //Kollar ljusstyrkan ändras pixlar vertikalt
     for (size_t x = 0; x < summary_size + 1; x++) {
     for (size_t y = 0; y < summary_size; y++) {
         result.vertical.push_back(
@@ -123,12 +130,18 @@ int main(int argc, const char *argv[]) {
      *   - Compute its summary
      */
 
+     //Hasttabellen använder Image_Summary som nyckel + lagrar lista med bilder för dens summary
     Hash_Map<Image_Summary, vector<string>> map;
 
+    //Går igenom alla bilder
     for (const string &file : files) {
+        //löser in bild
         Image image = load_image(file);
+
+        //Skapar en förneklad summary av bilden
         Image_Summary summary = compute_summary(image);
 
+        //Lägger bilden i gruppen med samma summary (likhet)
         map[summary].push_back(file);
     }
 
@@ -143,9 +156,11 @@ int main(int argc, const char *argv[]) {
      * - Display sets of files with equal summaries
      */
 
+     //Går igenom alla grupper i hashtabellen
     for (auto it = map.begin(); it != map.end(); ++it) {
         auto [summary, filenames] = *it;
 
+        //Om minst två bilder har samma summary -> dubletter
         if (filenames.size() >= 2) {
             window->report_match(filenames);
         }      
