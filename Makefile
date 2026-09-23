@@ -6,7 +6,7 @@ CXX       := g++ -std=c++20 -pipe
 OPTIMIZE  := -O3
 FLAGS     := $(OPTIMIZE) -Wall -Wextra -g
 LDFLAGS   := -pthread
-LIBFLAGS  := -lsfml-graphics -lsfml-window -lsfml-system
+LIBFLAGS = -lsfml-graphics -lsfml-window -lsfml-system -lole32 -luuid -lgdi32
 SFML_EXEC := slow fast
 HASH_EXEC := hash_test
 EXEC      := $(HASH_EXEC) $(SFML_EXEC)

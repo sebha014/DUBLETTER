@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include "hash_map.h"
 
 using std::cout;
 using std::cerr;
@@ -32,6 +33,7 @@ using std::unordered_map;
  * such, you will need to implement equality checks and a hash function for this
  * data structure.
  */
+/////////////////////////////////
 class Image_Summary {
 public:
     // Horizontal increases in brightness.
@@ -39,21 +41,61 @@ public:
 
     // Vertical increases in brightness.
     vector<bool> vertical;
+
+    bool operator==(const Image_Summary &other) const {
+        return horizontal == other.horizontal &&
+               vertical == other.vertical;
+    }
+};
+///////////////////////////////////////////////
+template <>
+class std::hash<Image_Summary> {
+public:
+    size_t operator()(const Image_Summary &to_hash) const {
+        size_t result = 0;
+
+        for (bool value : to_hash.horizontal) {
+            result = (result << 1) | value;
+        }
+
+        for (bool value : to_hash.vertical) {
+            result = (result << 1) | value;
+        }
+
+        return result;
+    }
 };
 
+////////////////////////////////////////////////
 // Compute an Image_Summary from an image. This is described in detail in the
 // lab instructions.
 Image_Summary compute_summary(const Image &image) {
     const size_t summary_size = 8;
     Image_Summary result;
 
-    // TODO: Finish the implementation.
-    // The lines below are here to avoid warnings. They can be removed.
-    (void)image;
-    (void)summary_size;
+    Image small = image.shrink(summary_size + 1, summary_size + 1);
+
+    for (size_t y = 0; y < summary_size + 1; y++) {
+    for (size_t x = 0; x < summary_size; x++) {
+        result.horizontal.push_back(
+            small.pixel(x + 1, y).brightness() >
+            small.pixel(x, y).brightness()
+        );
+    }
+}
+
+    for (size_t x = 0; x < summary_size + 1; x++) {
+    for (size_t y = 0; y < summary_size; y++) {
+        result.vertical.push_back(
+            small.pixel(x, y + 1).brightness() >
+            small.pixel(x, y).brightness()
+        );
+    }
+}
 
     return result;
 }
+////////////////////////////////////////////////////////
 
 int main(int argc, const char *argv[]) {
     WindowPtr window = Window::create(argc, argv);
@@ -81,6 +123,15 @@ int main(int argc, const char *argv[]) {
      *   - Compute its summary
      */
 
+    Hash_Map<Image_Summary, vector<string>> map;
+
+    for (const string &file : files) {
+        Image image = load_image(file);
+        Image_Summary summary = compute_summary(image);
+
+        map[summary].push_back(file);
+    }
+
 
     auto end = std::chrono::high_resolution_clock::now();
     cout << "Total time: "
@@ -92,5 +143,13 @@ int main(int argc, const char *argv[]) {
      * - Display sets of files with equal summaries
      */
 
+    for (auto it = map.begin(); it != map.end(); ++it) {
+        auto [summary, filenames] = *it;
+
+        if (filenames.size() >= 2) {
+            window->report_match(filenames);
+        }      
+    }
+    
     return 0;
 }
