@@ -58,22 +58,22 @@ bilden i en hashtabell. Då behandlas alla bilder en gång istället för två.
   från tiden det tar att jämföra bilderna. (Varför?) Du kan anta att inläsning
   är det dyra, och att inläsning tar lika lång tid i både "slow" och "fast"
 
-|--------+-----------+--------+--------|
-|        | inläsning |  slow  |  fast  |
-|--------+-----------+--------+--------|
-| tiny   |   69 ms   | 116 ms |  61 ms |
-| small  |  471 ms   | 703 ms | 455 ms |
-| medium |  2019 ms  | 3218 ms| 1948 ms|
-| large  |           |        |        | Hittar ej någon large i givenfiles
-|--------+-----------+--------+--------|
+|--------+-----------+--------+---------|
+|        | inläsning |  slow   |  fast  |
+|--------+-----------+--------+---------|
+| tiny   |   69 ms   | 116 ms  |  61 ms |
+| small  |  471 ms   | 703 ms  | 455 ms |
+| medium |  2019 ms  | 3218 ms | 1948 ms|
+| large  | 35217 ms  |302916 ms|34519 ms| 
+|--------+-----------+--------+---------|
 
 
 - Testa olika värden på "summary_size" (exempelvis mellan 6 och 10). Hur
-  påverkar detta vilka dubbletter som hittas i datamängden "large"?
+  påverkar detta vilka dubbletter som hittas i datamängden "large"? 9 
 
-Hittar ingen large så går ej att testa hur olika värden på summary_size påverkar.
-Generellt gäller likt dem andra dock att ett högre värde ger en bättre / mer detaljerad
-sammanfattning.
+När vi ändrade värdet på summary_size mellan 6 och 10 så blev antalet dubletter samma i large, däremot när vi
+tog ett ännu lägre värde t.ex. 1, 2 och 3 så blev antalet "dubletter" väldigt många fler, bilder som ej var lika ansågs vara dubletter.
+Anledningen till detta är att desto högre värde på summary_size desto mer detaljerad jämförelse -> mer exakta dubletter.
 
 - Algoritmen som implementeras i "compute_summary" kan ses som att vi beräknar
   en hash av en bild. Det är dock inte helt lätt att hitta en bra sådan funktion
